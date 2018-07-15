@@ -1,0 +1,22 @@
+[Unit]
+Description=Kafka Manager
+After=docker.service zookeeper.service
+Requires=docker.service
+
+[Service]
+Environment=CONTAINER_NAME=kafka-manager
+Environment=IMAGE=sheepkiller/kafka-manager:stable
+Environment=KAFKA_MANAGER_PORT=9000
+Environment=ZOOKEEPER_PORT=2181
+
+EnvironmentFile=/etc/sysconfig/netvars
+EnvironmentFile=/etc/sysconfig/terraform-vars
+
+TimeoutStartSec=300
+Restart=on-failure
+
+ExecStartPre=-/usr/bin/docker stop ${CONTAINER_NAME}
+ExecStartPre=-/usr/bin/docker rm -f ${CONTAINER_NAME}
+ExecStartPre=/usr/bin/docker pull ${IMAGE}
+ExecStart=/bin/bash -c "/usr/bin/docker run --name ${CONTAINER_NAME} -p 8080:${KAFKA_MANAGER_PORT} -e JAVA_OPTS=\'-Xms128M -Xmx256M\' -e ZK_HOSTS=\"${ZOOKEEPER_CONNECT}\" ${IMAGE}"
+ExecStop=/usr/bin/docker stop ${CONTAINER_NAME}

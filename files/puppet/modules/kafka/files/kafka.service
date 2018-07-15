@@ -1,0 +1,35 @@
+[Unit]
+Description=Kafka
+After=docker.service zookeeper.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=/etc/sysconfig/kafka
+EnvironmentFile=/etc/sysconfig/netvars
+EnvironmentFile=/etc/sysconfig/terraform-vars
+
+Environment=CONTAINER_NAME=kafka
+Environment=IMAGE=edsonmarquezani/kafka
+Environment=PATH_DATA_HOST=/mnt/data/kafka
+Environment=JMX_PORT=1099
+Environment=ZOOKEEPER_PORT=2181
+
+Environment=KAFKA_PORT=9092
+Environment=KAFKA_CONF_LOG_DIRS=/kafka/data
+Environment=KAFKA_CONF_LISTENERS=PLAINTEXT://0.0.0.0:9092
+Environment=KAFKA_CONF_LOG_RETENTION_HOURS=72
+Environment=KAFKA_CONF_NUM_PARTITIONS=1
+Environment=KAFKA_CONF_DELETE_TOPIC_ENABLE=true
+Environment=KAFKA_CONF_SOCKET_SEND_BUFFER_BYTES=102400
+Environment=KAFKA_CONF_SOCKET_RECEIVE_BUFFER_BYTES=102400
+Environment=KAFKA_CONF_SOCKET_REQUEST_MAX_BYTES=104857600
+Environment=KAFKA_CONF_AUTO_CREATE_TOPICS_ENABLE=false
+
+TimeoutStartSec=300
+Restart=on-failure
+
+ExecStartPre=-/usr/bin/docker stop ${CONTAINER_NAME}
+ExecStartPre=-/usr/bin/docker rm -f ${CONTAINER_NAME}
+ExecStartPre=/usr/bin/docker pull ${IMAGE}
+ExecStart=/bin/bash -c "/usr/bin/docker run -p ${KAFKA_PORT}:${KAFKA_PORT} -p ${JMX_PORT}:${JMX_PORT} --name ${CONTAINER_NAME} -v ${PATH_DATA_HOST}:/${KAFKA_CONF_LOG_DIRS} -e KAFKA_CONF_LOG_RETENTION_HOURS=${KAFKA_CONF_LOG_RETENTION_HOURS} -e KAFKA_CONF_NUM_PARTITIONS=${KAFKA_CONF_NUM_PARTITIONS} -e KAFKA_CONF_DELETE_TOPIC_ENABLE=${KAFKA_CONF_DELETE_TOPIC_ENABLE} -e KAFKA_CONF_SOCKET_SEND_BUFFER_BYTES=${KAFKA_CONF_SOCKET_SEND_BUFFER_BYTES} -e KAFKA_CONF_SOCKET_RECEIVE_BUFFER_BYTES=${KAFKA_CONF_SOCKET_RECEIVE_BUFFER_BYTES} -e KAFKA_CONF_SOCKET_REQUEST_MAX_BYTES=${KAFKA_CONF_SOCKET_REQUEST_MAX_BYTES} -e KAFKA_CONF_LOG_DIRS=${KAFKA_CONF_LOG_DIRS} -e KAFKA_CONF_BROKER_ID=${KAFKA_BROKER_ID} -e KAFKA_CONF_LISTENERS=${KAFKA_CONF_LISTENERS} -e KAFKA_CONF_ADVERTISED_LISTENERS=PLAINTEXT://${IP_ADDRESS}:${KAFKA_PORT} -e KAFKA_CONF_ZOOKEEPER_CONNECT=\"${ZOOKEEPER_CONNECT}\" -e KAFKA_CONF_AUTO_CREATE_TOPICS_ENABLE=${KAFKA_CONF_AUTO_CREATE_TOPICS_ENABLE} -e KAFKA_JMX_OPTS=\"-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=${IP_ADDRESS} -Dcom.sun.management.jmxremote.rmi.port=${JMX_PORT}\" -e KAFKA_HEAP_OPTS=\'-Xms${KAFKA_HEAP_SIZE} -Xmx${KAFKA_HEAP_SIZE}\' -e JMX_PORT=${JMX_PORT} ${IMAGE}:${KAFKA_VERSION}"
+ExecStop=/usr/bin/docker stop ${CONTAINER_NAME}

@@ -1,0 +1,11 @@
+forge "https://forge.puppet.com"
+
+mod 'puppet/selinux', '1.5.1'
+mod 'puppetlabs/lvm', '1.0.0'
+mod 'puppetlabs/docker', '1.0.4'
+mod 'puppetlabs/stdlib', '4.24.0'
+mod 'stahnma/epel', '1.3.0'
+mod 'razorsedge/snmp'
+mod 'saz/timezone', '3.3.0'
+mod 'herculesteam/augeasproviders_sysctl', '2.2.0'
+mod 'herculesteam/augeasproviders_core', '2.1.3'
