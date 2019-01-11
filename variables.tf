@@ -1,26 +1,20 @@
-variable "region" {
-  default     = "sa-east-1"
-  description = "AWS region"
-}
-
-variable "subnets" {
+variable "subnet-ids" {
   type        = "list"
-  default     = []
   description = "List of subnet IDs where EC2 instances will placed on"
 }
 
-variable "azs" {
-  type        = "list"
-  default     = []
-  description = "List of Availability Zones where EC2 instances will placed on. Must match Subnets list"
+variable "vpc-id" {
+  type        = "string"
+  description = "VPC id of subnets above"
 }
 
-variable "vpc_id" {
-  type = "string"
+variable "lb-subnet-ids" {
+  type        = "list"
+  description = "List of subnet IDs where load balancer will placed on (take into consideration if it's going to be public or private)"
 }
 
 variable "instances-name-prefix" {
-  default     = "mykafka"
+  default     = "kafka"
   description = "Name prefix of EC2 instances (used for Name tags and DNS names defaults)"
 }
 
@@ -81,7 +75,7 @@ variable "zookeeper-dns-prefix" {
 variable "tags" {
   type        = "map"
   default     = {}
-  description = "Additional tags for EC2 instances"
+  description = "Tags for EC2 instances"
 }
 
 variable "disable-api-termination" {
@@ -105,13 +99,12 @@ variable "domain" {
 }
 
 variable "allowed-networks" {
-  type        = "list"
-  description = "List of CIDR blocks which will be allowed access to Kafka"
-}
+  default = ["10.0.0.0/8",
+    "172.16.0.0/12",
+    "192.168.0.0/16",
+  ]
 
-variable "puppet-files-path" {
-  default     = ""
-  description = "Optional alternative path for Puppet manifests to be used instead of module's version of it"
+  description = "List of CIDR blocks which will be allowed access to Kafka"
 }
 
 variable "install-kafka-manager" {
